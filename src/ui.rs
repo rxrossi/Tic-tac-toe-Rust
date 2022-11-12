@@ -7,11 +7,13 @@ use piston::GenericEvent;
 use piston::RenderArgs;
 
 use self::board_scene::BoardScene;
+pub use self::board_scene::board::BoardState;
+pub use self::board_scene::board::Mark;
 
 mod board_scene;
 
 pub trait Render {
-    fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) -> ();
+    fn render(&mut self, gl: &mut GlGraphics, args: &RenderArgs) -> ();
 }
 
 pub trait HandleEvent {
@@ -27,7 +29,7 @@ pub struct RenderCoords {
 }
 
 
-pub fn ui2() {
+pub fn ui<'a>(board_state_controller: Box<dyn BoardState + 'a>) {
     // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
 
@@ -40,7 +42,7 @@ pub fn ui2() {
 
     let mut gl = GlGraphics::new(opengl);
 
-    let mut board = BoardScene::new();
+    let mut board = BoardScene::new(board_state_controller);
 
     let mut events = Events::new(EventSettings::new());
 

@@ -1,29 +1,30 @@
 use opengl_graphics::GlGraphics;
-use piston::RenderArgs;
+use piston::{Button, MouseButton, RenderArgs};
 
-
-use self::board::Board;
+use self::board::{Board, BoardState};
 
 use super::{HandleEvent, Render};
 
-mod board;
+pub mod board;
 
-pub struct BoardScene {
+pub struct BoardScene<'a> {
     mouse_coords: [f64; 2],
-    board: Board,
+    board: Board<'a>,
 }
 
-impl BoardScene {
-    pub fn new() -> BoardScene {
+impl BoardScene<'_> {
+    pub fn new<'a>(board_state_controller: Box<dyn BoardState + 'a>) -> BoardScene<'a> {
+
         BoardScene {
             mouse_coords: [0., 0.],
-            board: Board::new(),
+            board: Board::new(board_state_controller),
         }
     }
+
 }
 
-impl Render for BoardScene {
-    fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) {
+impl Render for BoardScene<'_> {
+    fn render(&mut self, gl: &mut GlGraphics, args: &RenderArgs) {
         use graphics::*;
 
         gl.draw(args.viewport(), |_ctx, gl| {
@@ -36,7 +37,7 @@ impl Render for BoardScene {
     }
 }
 
-impl HandleEvent for BoardScene {
+impl HandleEvent for BoardScene<'_> {
     fn handle_event<E: piston::GenericEvent>(&mut self, e: E, gl: &mut GlGraphics) -> () {
         // use piston::mouse::*;
 
@@ -48,10 +49,10 @@ impl HandleEvent for BoardScene {
             self.mouse_coords = pos;
         }
 
-        // if let Some(button) = e.press_args() {
-        //     if button == Button::Mouse(MouseButton::Left) {
-        //         self.handle_left_mouse_click(self.mouse_coords);
-        //     }
-        // }
+        if let Some(button) = e.press_args() {
+            if button == Button::Mouse(MouseButton::Left) {
+                self.board.handle_left_mouse_click(self.mouse_coords);
+            }
+        }
     }
 }

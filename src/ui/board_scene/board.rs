@@ -15,14 +15,14 @@ pub enum Mark {
 }
 
 #[derive(PartialEq)]
-struct BoardGridSpace {
+pub struct BoardGridSpace {
     pos_x_y: [i8; 2],
     render_coords: RenderCoords,
     pub mark: Option<Mark>,
 }
 
 impl Render for BoardGridSpace {
-    fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) -> () {
+    fn render(&mut self, gl: &mut GlGraphics, args: &RenderArgs) -> () {
         use graphics::*;
 
         gl.draw(args.viewport(), |c, gl| {
@@ -50,14 +50,20 @@ impl Render for BoardGridSpace {
     }
 }
 
-pub struct Board {
-    grid_spaces: Vec<BoardGridSpace>,
+pub struct Board<'a> {
+    pub state: Box<dyn BoardState + 'a>,// TODO: remove pub
+    grid_spaces: Vec<BoardGridSpace>, 
     view_coords: [f64; 2],
     view_size: f64,
 }
 
-impl Board {
-    pub fn new() -> Board {
+pub trait BoardState {
+    fn get_grid_spaces(&self) -> [[Option<Mark>; 3]; 3];
+    fn set_grid_space(&mut self, x: usize, y: usize) -> ();
+}
+
+impl<'a> Board<'a> {
+    pub fn new(board_state: Box<dyn BoardState + 'a>) -> Board {
         let view_size = 400.00; //TODO: hardcoded value
         let view_coords = [50.0, 50.0]; //TODO: hardcoded value
 
@@ -77,14 +83,12 @@ impl Board {
             .collect();
 
         Board {
+            state: board_state,
             grid_spaces: board_grid_spaces,
             view_size,
             view_coords,
         }
     }
-
-
-
 
     fn calc_render_coords(
         board_view_size: f64,
@@ -105,10 +109,31 @@ impl Board {
 
         RenderCoords { x0, x1, y0, y1 }
     }
+
+    // Returns true if the the click has added a mark
+    pub fn handle_left_mouse_click(&mut self, coords: [f64; 2]) -> bool {
+        let grid_space_being_hovered_option = self.grid_spaces.iter_mut().find(|grid_space| {
+            let inside_x_axis = coords[0] >= grid_space.render_coords.x0
+                && coords[0] <= grid_space.render_coords.x1;
+
+            let inside_y_axis = coords[1] >= grid_space.render_coords.y0
+                && coords[1] <= grid_space.render_coords.y1;
+
+            return inside_x_axis && inside_y_axis;
+        });
+
+        if let Some(grid_space) = grid_space_being_hovered_option {
+            //TODO: inverted?
+            self.state.set_grid_space(grid_space.pos_x_y[1] as usize, grid_space.pos_x_y[0] as usize);
+            true
+        } else {
+            false
+        }
+    }
 }
 
-impl Render for Board {
-    fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) -> () {
+impl<'a> Render for Board<'a> {
+    fn render(&mut self, gl: &mut GlGraphics, args: &RenderArgs) -> () {
         use graphics::*;
 
         gl.draw(args.viewport(), |c, gl| {
@@ -126,9 +151,16 @@ impl Render for Board {
                 &mut *gl,
             );
 
-            self.grid_spaces.iter().for_each(|grid_space| {
-                grid_space.render(gl, args);
-            });
+            self.grid_spaces
+                .iter_mut()
+                .enumerate()
+                .for_each(|(i, grid_space)| {
+                    let y = i % 3;
+                    let x = i / 3;
+
+                    grid_space.mark = self.state.get_grid_spaces()[x][y].clone();
+                    grid_space.render(gl, args);
+                });
         });
     }
 }

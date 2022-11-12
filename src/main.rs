@@ -1,5 +1,8 @@
-use tic_tac_toe_3::ui::ui2;
+use tic_tac_toe_3::{ui::ui, ui_state_controller::UiBoardStateController};
+
 
 fn main() {
-    ui2();
+    let board_state_controller = Box::new(UiBoardStateController::new());
+
+    ui(board_state_controller);
 }
