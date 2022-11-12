@@ -59,7 +59,7 @@ pub struct Board<'a> {
 
 pub trait BoardState {
     fn get_grid_spaces(&self) -> [[Option<Mark>; 3]; 3];
-    fn set_grid_space(&mut self, x: usize, y: usize) -> ();
+    fn on_grid_space_click(&mut self, x: usize, y: usize) -> ();
 }
 
 impl<'a> Board<'a> {
@@ -124,7 +124,7 @@ impl<'a> Board<'a> {
 
         if let Some(grid_space) = grid_space_being_hovered_option {
             //TODO: inverted?
-            self.state.set_grid_space(grid_space.pos_x_y[1] as usize, grid_space.pos_x_y[0] as usize);
+            self.state.on_grid_space_click(grid_space.pos_x_y[1] as usize, grid_space.pos_x_y[0] as usize);
             true
         } else {
             false

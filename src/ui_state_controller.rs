@@ -1,27 +1,58 @@
-use crate::ui::{BoardState, Mark};
+use crate::{
+    board,
+    game::{Game, Player},
+    ui,
+};
 
 pub struct UiBoardStateController {
-    state: [[Option<Mark>; 3]; 3],
+    game: Game,
 }
 
 impl UiBoardStateController {
     pub fn new() -> UiBoardStateController {
-        UiBoardStateController {
-            state: [
-                [Some(Mark::RED), None, None],
-                [Some(Mark::BLUE), None, None],
-                [Some(Mark::RED), None, Some(Mark::BLUE)],
-            ],
+        let game = Game::new(Player::Player1);
+
+        UiBoardStateController { game }
+    }
+
+    fn game_logic_to_ui_grid_space(&self, coords: [usize; 2]) -> Option<ui::Mark> {
+        match self.game.board.grid_spaces[coords[0]][coords[1]] {
+            Some(board::Mark::X) => Some(ui::Mark::RED),
+            Some(board::Mark::O) => Some(ui::Mark::BLUE),
+            None => None,
         }
     }
 }
 
-impl BoardState for UiBoardStateController {
-    fn get_grid_spaces(&self) -> [[Option<Mark>; 3]; 3] {
-        self.state.clone()
+impl ui::BoardState for UiBoardStateController {
+    fn get_grid_spaces(&self) -> [[Option<ui::Mark>; 3]; 3] {
+        [
+            [
+                self.game_logic_to_ui_grid_space([0, 0]),
+                self.game_logic_to_ui_grid_space([1, 0]),
+                self.game_logic_to_ui_grid_space([2, 0]),
+            ],
+            [
+                self.game_logic_to_ui_grid_space([0, 1]),
+                self.game_logic_to_ui_grid_space([1, 1]),
+                self.game_logic_to_ui_grid_space([2, 1]),
+            ],
+            [
+                self.game_logic_to_ui_grid_space([0, 2]),
+                self.game_logic_to_ui_grid_space([1, 2]),
+                self.game_logic_to_ui_grid_space([2, 2]),
+            ],
+        ]
     }
 
-    fn set_grid_space(&mut self, x: usize, y: usize) -> () {
-        self.state[x][y] = Some(Mark::BLUE);
+    fn on_grid_space_click(&mut self, x: usize, y: usize) -> () {
+        if self.game.has_anyone_won() != None {
+
+        } else if self.game.is_my_turn() {
+            self.game.add_mark_at([y, x]); //TODO: has been inverted
+        } else {
+            self.game.add_mark_as_the_other_player([y, x])
+        }
+
     }
 }

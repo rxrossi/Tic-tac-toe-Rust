@@ -16,7 +16,7 @@ pub struct Game {
     turn_of: Player,
     pub score: Score,
     who_am_i: Player,
-    board: Board,
+    pub board: Board,
 }
 
 fn player_to_mark(player: &Player) -> Mark {

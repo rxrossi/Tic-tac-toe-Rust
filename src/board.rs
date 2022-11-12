@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 #[derive(Debug)]
 pub struct Board {
-    grid_spaces: [[Option<Mark>; 3]; 3],
+    pub grid_spaces: [[Option<Mark>; 3]; 3],
 }
 
 impl Board {
