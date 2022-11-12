@@ -89,7 +89,7 @@ fn wins_as_player1() {
     // - O -
     // O - -
 
-    // assert_eq!(game.is_my_turn(), false);
+    assert_eq!(game.is_my_turn(), false);
     assert_eq!(game.has_anyone_won(), Some(Player::Player1));
     assert_eq!(game.score.player_1, 1);
     assert_eq!(game.score.player_2, 0);
