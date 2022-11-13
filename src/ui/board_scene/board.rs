@@ -60,6 +60,7 @@ pub struct Board<'a> {
 pub trait BoardState {
     fn get_grid_spaces(&self) -> [[Option<Mark>; 3]; 3];
     fn on_grid_space_click(&mut self, x: usize, y: usize) -> ();
+    fn has_game_finished(&self) -> bool;
 }
 
 impl<'a> Board<'a> {
@@ -129,6 +130,10 @@ impl<'a> Board<'a> {
         } else {
             false
         }
+    }
+
+    pub fn has_game_finished(&self) -> bool {
+        self.state.has_game_finished()
     }
 }
 

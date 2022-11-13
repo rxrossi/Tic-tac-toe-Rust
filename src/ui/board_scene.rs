@@ -14,13 +14,15 @@ pub struct BoardScene<'a> {
 
 impl BoardScene<'_> {
     pub fn new<'a>(board_state_controller: Box<dyn BoardState + 'a>) -> BoardScene<'a> {
-
         BoardScene {
             mouse_coords: [0., 0.],
             board: Board::new(board_state_controller),
         }
     }
 
+    pub fn ended(&self) -> bool {
+        self.board.has_game_finished()
+    }
 }
 
 impl Render for BoardScene<'_> {
@@ -39,7 +41,6 @@ impl Render for BoardScene<'_> {
 
 impl HandleEvent for BoardScene<'_> {
     fn handle_event<E: piston::GenericEvent>(&mut self, e: E, gl: &mut GlGraphics) -> () {
-        // use piston::mouse::*;
 
         if let Some(args) = e.render_args() {
             self.render(gl, &args);

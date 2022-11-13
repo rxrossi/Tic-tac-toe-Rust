@@ -1,7 +1,9 @@
-use tic_tac_toe_3::{ui::ui, ui_state_controller::UiBoardStateController};
+use tic_tac_toe_3::{
+    game::{Game, Player},
+    ui::ui,
+};
 
 fn main() {
-    let board_state_controller = Box::new(UiBoardStateController::new());
-
-    ui(board_state_controller);
+    let mut game = Game::new(Player::Player1);
+    ui(&mut game);
 }

@@ -1,17 +1,16 @@
+
 use crate::{
     board,
-    game::{Game, Player},
+    game::Game,
     ui,
 };
 
-pub struct UiBoardStateController {
-    game: Game,
+pub struct UiBoardStateController<'a> {
+    pub game: &'a mut Game,
 }
 
-impl UiBoardStateController {
-    pub fn new() -> UiBoardStateController {
-        let game = Game::new(Player::Player1);
-
+impl UiBoardStateController<'_> {
+    pub fn new(game: &mut Game) -> UiBoardStateController {
         UiBoardStateController { game }
     }
 
@@ -24,7 +23,7 @@ impl UiBoardStateController {
     }
 }
 
-impl ui::BoardState for UiBoardStateController {
+impl ui::BoardState for UiBoardStateController<'_> {
     fn get_grid_spaces(&self) -> [[Option<ui::Mark>; 3]; 3] {
         [
             [
@@ -54,5 +53,9 @@ impl ui::BoardState for UiBoardStateController {
             self.game.add_mark_as_the_other_player([y, x])
         }
 
+    }
+
+    fn has_game_finished(&self) -> bool {
+        self.game.has_anyone_won() != None
     }
 }
