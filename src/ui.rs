@@ -3,14 +3,14 @@ use opengl_graphics::{GlGraphics, OpenGL};
 use piston::event_loop::{EventSettings, Events};
 use piston::window::WindowSettings;
 use piston::RenderArgs;
-use piston::RenderEvent;
 use piston::{AfterRenderEvent, GenericEvent};
 
 use crate::game::Game;
 use crate::ui_state_controller::UiBoardStateController;
 
-pub use self::board_scene::board::BoardState;
+pub use self::board_scene::board::GameState;
 pub use self::board_scene::board::Mark;
+pub use self::board_scene::board::Score;
 use self::board_scene::BoardScene;
 use self::initial_screen::InitialScreen;
 

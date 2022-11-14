@@ -64,21 +64,26 @@ impl Render for BoardGridSpace {
     }
 }
 
-pub struct Board<'a> {
-    pub state: Box<dyn BoardState + 'a>, // TODO: remove pub
+pub struct Board {
     grid_spaces: Vec<BoardGridSpace>,
     view_coords: [f64; 2],
     view_size: f64,
 }
 
-pub trait BoardState {
+pub struct Score {
+    pub player_1: usize,
+    pub player_2: usize,
+}
+
+pub trait GameState {
     fn get_grid_spaces(&self) -> [[Option<Mark>; 3]; 3];
     fn on_grid_space_click(&mut self, x: usize, y: usize) -> ();
+    fn get_score(&self) -> Score;
     fn has_game_finished(&self) -> bool;
 }
 
-impl<'a> Board<'a> {
-    pub fn new(board_state: Box<dyn BoardState + 'a>) -> Board {
+impl Board {
+    pub fn new() -> Board {
         let view_size = 400.00; //TODO: hardcoded value
         let view_coords = [50.0, 50.0]; //TODO: hardcoded value
 
@@ -98,7 +103,6 @@ impl<'a> Board<'a> {
             .collect();
 
         Board {
-            state: board_state,
             grid_spaces: board_grid_spaces,
             view_size,
             view_coords,
@@ -126,7 +130,10 @@ impl<'a> Board<'a> {
     }
 
     // Returns true if the the click has added a mark
-    pub fn handle_left_mouse_click(&mut self, coords: [f64; 2]) -> bool {
+    pub fn handle_left_mouse_click<T>(&mut self, coords: [f64; 2], mut on_grid_space_click: T) -> bool
+    where
+        T: FnMut((usize, usize)) -> (),
+    {
         let grid_space_being_hovered_option = self.grid_spaces.iter_mut().find(|grid_space| {
             let inside_x_axis = coords[0] >= grid_space.render_coords.x0
                 && coords[0] <= grid_space.render_coords.x1;
@@ -139,23 +146,22 @@ impl<'a> Board<'a> {
 
         if let Some(grid_space) = grid_space_being_hovered_option {
             //TODO: inverted?
-            self.state.on_grid_space_click(
+            on_grid_space_click((
                 grid_space.pos_x_y[1] as usize,
                 grid_space.pos_x_y[0] as usize,
-            );
+            ));
             true
         } else {
             false
         }
     }
 
-    pub fn has_game_finished(&self) -> bool {
-        self.state.has_game_finished()
-    }
-}
-
-impl<'a> Render for Board<'a> {
-    fn render(&mut self, gl: &mut GlGraphics, args: &RenderArgs) -> () {
+    pub fn render(
+        &mut self,
+        gl: &mut GlGraphics,
+        args: &RenderArgs,
+        grid_spaces_marks: [[Option<Mark>; 3]; 3],
+    ) -> () {
         use graphics::*;
 
         gl.draw(args.viewport(), |c, gl| {
@@ -180,7 +186,7 @@ impl<'a> Render for Board<'a> {
                     let y = i % 3;
                     let x = i / 3;
 
-                    grid_space.mark = self.state.get_grid_spaces()[x][y].clone();
+                    grid_space.mark = grid_spaces_marks[x][y].clone();
                     grid_space.render(gl, args);
                 });
         });

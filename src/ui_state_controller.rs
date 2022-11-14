@@ -1,9 +1,6 @@
-
-use crate::{
-    board,
-    game::Game,
-    ui,
-};
+use crate::game::Game;
+use crate::ui::{self, Score};
+use crate::board;
 
 pub struct UiBoardStateController<'a> {
     pub game: &'a mut Game,
@@ -23,7 +20,14 @@ impl UiBoardStateController<'_> {
     }
 }
 
-impl ui::BoardState for UiBoardStateController<'_> {
+impl ui::GameState for UiBoardStateController<'_> {
+    fn get_score(&self) -> Score  {
+        Score {
+            player_1: self.game.score.player_1,
+            player_2: self.game.score.player_2,
+        }
+    }
+
     fn get_grid_spaces(&self) -> [[Option<ui::Mark>; 3]; 3] {
         [
             [
@@ -46,13 +50,11 @@ impl ui::BoardState for UiBoardStateController<'_> {
 
     fn on_grid_space_click(&mut self, x: usize, y: usize) -> () {
         if self.game.has_anyone_won() != None {
-
         } else if self.game.is_my_turn() {
             self.game.add_mark_at([y, x]); //TODO: has been inverted
         } else {
             self.game.add_mark_as_the_other_player([y, x])
         }
-
     }
 
     fn has_game_finished(&self) -> bool {
