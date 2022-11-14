@@ -1,10 +1,11 @@
+use graphics::rectangle::square;
 use opengl_graphics::GlGraphics;
+use opengl_graphics::{Texture, TextureSettings};
 use piston::input::RenderArgs;
+use std::path::Path;
 
 pub const BOARD_COLOR: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 pub const GRID_SPACE_COLOR_EMPTY: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-pub const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0]; // RED
-pub const BLUE: [f32; 4] = [0.0, 0.0, 1.0, 1.0]; // BLUE
 
 use crate::ui::{Render, RenderCoords};
 
@@ -28,15 +29,8 @@ impl Render for BoardGridSpace {
         gl.draw(args.viewport(), |c, gl| {
             let transform = c.transform.trans(0.0, 0.0).rot_rad(0.0).trans(0.0, 0.0);
 
-            let mut grid_space_color = GRID_SPACE_COLOR_EMPTY;
-            match self.mark {
-                Some(Mark::RED) => grid_space_color = RED,
-                Some(Mark::BLUE) => grid_space_color = BLUE,
-                _ => (),
-            }
-
             rectangle(
-                grid_space_color,
+                GRID_SPACE_COLOR_EMPTY,
                 rectangle::rectangle_by_corners(
                     self.render_coords.x0,
                     self.render_coords.y0,
@@ -47,12 +41,32 @@ impl Render for BoardGridSpace {
                 &mut *gl,
             );
         });
+
+        if let Some(mark) = &self.mark {
+            let image = Image::new().rect(square(
+                self.render_coords.x0 + 40.,
+                self.render_coords.y0 + 40.,
+                400. / 3. - 80.,
+            ));
+            let settings = TextureSettings::new();
+
+            let path = match mark {
+                Mark::RED => "assets/X.png",
+                Mark::BLUE => "assets/O.png",
+            };
+
+            let texture = Texture::from_path(Path::new(path as &str), &settings).unwrap();
+
+            gl.draw(args.viewport(), |c, gl| {
+                image.draw(&texture, &DrawState::default(), c.transform, gl);
+            });
+        }
     }
 }
 
 pub struct Board<'a> {
-    pub state: Box<dyn BoardState + 'a>,// TODO: remove pub
-    grid_spaces: Vec<BoardGridSpace>, 
+    pub state: Box<dyn BoardState + 'a>, // TODO: remove pub
+    grid_spaces: Vec<BoardGridSpace>,
     view_coords: [f64; 2],
     view_size: f64,
 }
@@ -125,7 +139,10 @@ impl<'a> Board<'a> {
 
         if let Some(grid_space) = grid_space_being_hovered_option {
             //TODO: inverted?
-            self.state.on_grid_space_click(grid_space.pos_x_y[1] as usize, grid_space.pos_x_y[0] as usize);
+            self.state.on_grid_space_click(
+                grid_space.pos_x_y[1] as usize,
+                grid_space.pos_x_y[0] as usize,
+            );
             true
         } else {
             false

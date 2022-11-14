@@ -1,3 +1,4 @@
+use graphics::color::hex;
 use opengl_graphics::GlGraphics;
 use piston::{Button, MouseButton, RenderArgs};
 
@@ -30,9 +31,7 @@ impl Render for BoardScene<'_> {
         use graphics::*;
 
         gl.draw(args.viewport(), |_ctx, gl| {
-            const BACKGROUND_COLOR: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
-
-            clear(BACKGROUND_COLOR, gl);
+            clear(hex("032E4E"), gl);
         });
 
         self.board.render(gl, args);

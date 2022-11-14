@@ -12,8 +12,10 @@ use crate::ui_state_controller::UiBoardStateController;
 pub use self::board_scene::board::BoardState;
 pub use self::board_scene::board::Mark;
 use self::board_scene::BoardScene;
+use self::initial_screen::InitialScreen;
 
 mod board_scene;
+mod initial_screen;
 
 pub trait Render {
     fn render(&mut self, gl: &mut GlGraphics, args: &RenderArgs) -> ();
@@ -46,9 +48,15 @@ pub fn ui(game: &mut Game) {
 
     let mut events = Events::new(EventSettings::new());
 
+    let show_initial_screen = false;
+
     loop {
-        if game.has_anyone_won() != None {
-            println!("done");
+        if show_initial_screen {
+            let mut scene = InitialScreen::new();
+
+            while let Some(e) = events.next(&mut window) {
+                scene.handle_event(e.clone(), &mut gl);
+            }
         } else {
             let board_state_controller = Box::new(UiBoardStateController::new(game));
             let mut scene = BoardScene::new(board_state_controller);
