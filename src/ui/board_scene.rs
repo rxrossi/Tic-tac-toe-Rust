@@ -2,16 +2,32 @@ use graphics::color::hex;
 use opengl_graphics::GlGraphics;
 use piston::{Button, MouseButton, RenderArgs};
 
-use self::board::{Board, GameState};
+use self::{board::Board, score::ScoreUi};
 
-use super::{HandleEvent, Render};
+use super::{HandleEvent, Mark, Render};
 
 pub mod board;
 pub mod score;
 
+pub struct Score {
+    pub player_1: usize,
+    pub player_2: usize,
+}
+
+impl Score {}
+
+//TODO: Move this
+pub trait GameState {
+    fn get_grid_spaces(&self) -> [[Option<Mark>; 3]; 3];
+    fn on_grid_space_click(&mut self, x: usize, y: usize) -> ();
+    fn get_score(&self) -> Score;
+    fn has_game_finished(&self) -> bool;
+}
+
 pub struct BoardScene<'a> {
     mouse_coords: [f64; 2],
     board: Board,
+    score: ScoreUi,
     game_state_controller: Box<dyn GameState + 'a>, // TODO: remove pub
 }
 
@@ -19,6 +35,7 @@ impl BoardScene<'_> {
     pub fn new<'a>(game_state_controller: Box<dyn GameState + 'a>) -> BoardScene<'a> {
         BoardScene {
             mouse_coords: [0., 0.],
+            score: ScoreUi,
             board: Board::new(),
             game_state_controller,
         }
@@ -37,18 +54,10 @@ impl Render for BoardScene<'_> {
             clear(hex("032E4E"), gl);
         });
 
-        self.board.render(gl, args, self.game_state_controller.get_grid_spaces());
+        self.board
+            .render(gl, args, self.game_state_controller.get_grid_spaces());
 
-        // I need to execute the render method of Score here. To be able to do that,
-        // I need the state info about the score, but the `Board` owns it. It owns it
-        // because it needs the grid space click function and information about the
-        // marks placed on the grids. If I could pass down that information instead of the state
-        // controller, I could fix it
-        //
-        // 1. BoardScene should own the board_state_controller, which could be named
-        //    game_state_controller instead
-        // 2. Board render should take the grid spaces info
-        // 3. Board handle_left_mouse_click should take a closure that can change the data
+        self.score.render(gl, args, self.game_state_controller.get_score());
     }
 }
 

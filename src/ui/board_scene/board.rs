@@ -70,18 +70,6 @@ pub struct Board {
     view_size: f64,
 }
 
-pub struct Score {
-    pub player_1: usize,
-    pub player_2: usize,
-}
-
-pub trait GameState {
-    fn get_grid_spaces(&self) -> [[Option<Mark>; 3]; 3];
-    fn on_grid_space_click(&mut self, x: usize, y: usize) -> ();
-    fn get_score(&self) -> Score;
-    fn has_game_finished(&self) -> bool;
-}
-
 impl Board {
     pub fn new() -> Board {
         let view_size = 400.00; //TODO: hardcoded value

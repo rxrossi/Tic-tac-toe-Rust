@@ -8,10 +8,10 @@ use piston::{AfterRenderEvent, GenericEvent};
 use crate::game::Game;
 use crate::ui_state_controller::UiBoardStateController;
 
-pub use self::board_scene::board::GameState;
 pub use self::board_scene::board::Mark;
-pub use self::board_scene::board::Score;
 use self::board_scene::BoardScene;
+pub use self::board_scene::GameState;
+pub use self::board_scene::Score;
 use self::initial_screen::InitialScreen;
 
 mod board_scene;
