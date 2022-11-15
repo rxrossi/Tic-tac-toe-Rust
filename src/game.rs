@@ -57,6 +57,10 @@ impl Game {
     pub fn add_mark_at(&mut self, coords: [usize; 2]) {
         self.board.set_mark(coords, player_to_mark(&self.who_am_i));
 
+        if self.board.is_board_full() == true {
+            self.board = Board::new()
+        }
+
         match self.has_anyone_won() {
             None => self.turn_of = self.the_other_player(),
             Some(player) => self.on_win(player),
@@ -66,6 +70,10 @@ impl Game {
     /// Meant to be used by the the IO client to inform about how the other play has played
     pub fn add_mark_as_the_other_player(&mut self, coords: [usize; 2]) {
         self.board.set_mark(coords, crate::board::Mark::O);
+
+        if self.board.is_board_full() == true {
+            self.board = Board::new()
+        }
 
         match self.has_anyone_won() {
             None => {
@@ -95,6 +103,8 @@ impl Game {
             Player::Player1 => self.score.player_1 += 1,
             Player::Player2 => self.score.player_2 += 1,
         };
+
+        self.board = Board::new()
     }
 }
 

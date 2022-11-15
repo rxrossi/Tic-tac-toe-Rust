@@ -63,6 +63,13 @@ impl Board {
 
         None
     }
+
+    pub fn is_board_full(&self) -> bool {
+        self.grid_spaces.iter().all(|row| {
+            row.iter()
+                .all(|space| if let None = space { false } else { true })
+        })
+    }
 }
 
 #[cfg(test)]
@@ -195,7 +202,6 @@ mod test_board_has_winner {
             board.set_mark([0, 2], Mark::O);
             assert_eq!(board.has_winner(), Some(Mark::O));
         }
-
 
         #[test]
         fn tie_on_first_diagonal() {
